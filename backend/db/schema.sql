@@ -5,10 +5,11 @@ CREATE SEQUENCE IF NOT EXISTS calendar_id_seq;
 CREATE TABLE calendar (
     id SERIAL PRIMARY KEY,
     date DATE,
-    start_time INT,
-    end_time INT
-    content VARCHAR(255)
+    start_time TIME,
+    end_time TIME,
+    content VARCHAR(255),
+    title VARCHAR(255)
 );
 
 
-INSERT INTO calendar (date, start_time, end_time, content) VALUES ('2026-08-20', '01-00', '23-59', 'Monica Birthday')
+INSERT INTO calendar (date, start_time, end_time, content, title) VALUES ('2026-08-20', '01:00', '23:59', 'Going to go theatre', 'Monica Birthday')
