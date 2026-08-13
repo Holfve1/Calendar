@@ -1,3 +1,4 @@
+import os
 import uuid
 
 from flask import Flask, jsonify, request
@@ -12,6 +13,20 @@ from lib.validation import (
     parse_recurrence,
     require_field,
 )
+
+
+def is_authorized(req):
+    expected_username = os.environ.get("BASIC_AUTH_USERNAME")
+    expected_password = os.environ.get("BASIC_AUTH_PASSWORD")
+    if not expected_username or not expected_password:
+        return True
+
+    auth = req.authorization
+    return (
+        auth is not None
+        and auth.username == expected_username
+        and auth.password == expected_password
+    )
 
 
 def serialize_entry(entry):
@@ -30,6 +45,17 @@ def serialize_entry(entry):
 def create_app(connection):
     app = Flask(__name__)
     CORS(app)
+
+    @app.before_request
+    def require_auth():
+        if request.method == "OPTIONS":
+            return
+        if not is_authorized(request):
+            return (
+                jsonify({"error": "Authentication required"}),
+                401,
+                {"WWW-Authenticate": 'Basic realm="Calendar"'},
+            )
 
     @app.route("/calendar", methods=["GET"])
     def get_calendar_entries():

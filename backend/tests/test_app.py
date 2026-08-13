@@ -286,3 +286,61 @@ def test_delete_calendar_series():
     connection.execute.assert_called_with(
         "DELETE FROM calendar WHERE recurrence_group_id = %s", [group_id]
     )
+
+
+def test_requires_auth_when_configured(monkeypatch):
+    monkeypatch.setenv("BASIC_AUTH_USERNAME", "admin")
+    monkeypatch.setenv("BASIC_AUTH_PASSWORD", "secret")
+    connection = Mock()
+    client = create_app(connection).test_client()
+
+    response = client.get("/calendar")
+
+    assert response.status_code == 401
+    connection.execute.assert_not_called()
+
+
+def test_rejects_wrong_credentials(monkeypatch):
+    monkeypatch.setenv("BASIC_AUTH_USERNAME", "admin")
+    monkeypatch.setenv("BASIC_AUTH_PASSWORD", "secret")
+    connection = Mock()
+    client = create_app(connection).test_client()
+
+    response = client.get("/calendar", auth=("admin", "wrong"))
+
+    assert response.status_code == 401
+
+
+def test_allows_correct_credentials(monkeypatch):
+    monkeypatch.setenv("BASIC_AUTH_USERNAME", "admin")
+    monkeypatch.setenv("BASIC_AUTH_PASSWORD", "secret")
+    connection = Mock()
+    connection.execute.return_value = []
+    client = create_app(connection).test_client()
+
+    response = client.get("/calendar", auth=("admin", "secret"))
+
+    assert response.status_code == 200
+
+
+def test_allows_requests_when_auth_not_configured(monkeypatch):
+    monkeypatch.delenv("BASIC_AUTH_USERNAME", raising=False)
+    monkeypatch.delenv("BASIC_AUTH_PASSWORD", raising=False)
+    connection = Mock()
+    connection.execute.return_value = []
+    client = create_app(connection).test_client()
+
+    response = client.get("/calendar")
+
+    assert response.status_code == 200
+
+
+def test_options_request_bypasses_auth(monkeypatch):
+    monkeypatch.setenv("BASIC_AUTH_USERNAME", "admin")
+    monkeypatch.setenv("BASIC_AUTH_PASSWORD", "secret")
+    connection = Mock()
+    client = create_app(connection).test_client()
+
+    response = client.options("/calendar")
+
+    assert response.status_code != 401
