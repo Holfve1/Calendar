@@ -8,7 +8,9 @@ CREATE TABLE calendar (
     start_time TIME,
     end_time TIME,
     content VARCHAR(255),
-    title VARCHAR(255)
+    title VARCHAR(255),
+    is_recurring BOOLEAN NOT NULL DEFAULT FALSE,
+    recurrence_group_id VARCHAR(36)
 );
 
 
