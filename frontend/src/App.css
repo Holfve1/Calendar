@@ -2,6 +2,14 @@
   box-sizing: border-box;
 }
 
+.login-gate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 1rem;
+}
+
 .modal-box h2 {
   color: #7a3e00;
 }
