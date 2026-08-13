@@ -13,6 +13,11 @@ class DatabaseConnection:
         self.test_mode = test_mode
 
     def connect(self, database_name=None):
+        database_url = os.environ.get("TEST_DATABASE_URL" if self.test_mode else "DATABASE_URL")
+        if database_url:
+            self.connection = psycopg2.connect(database_url)
+            return
+
         if database_name is None:
             env_var = "TEST_DATABASE_NAME" if self.test_mode else "DATABASE_NAME"
             database_name = os.environ.get(env_var)
